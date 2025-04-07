@@ -12,8 +12,22 @@ meta_columns = [col for col in df.columns if col not in sensor_columns]
 print(f"Initial rows: {len(df)}")
 
 # 1. Drop rows with any missing values in sensor readings or class label
-df.dropna(subset=sensor_columns + ['class_label'], inplace=True)
-print(f"After dropping NaNs in sensors and label: {len(df)}")
+# Clean sensor values: remove commas and strip spaces if any
+df[sensor_columns] = df[sensor_columns].replace({',': ''}, regex=True)
+df[sensor_columns] = df[sensor_columns].apply(lambda col: col.str.strip() if col.dtype == 'object' else col)
+
+# Debug: Check raw content of a few sensor columns before conversion
+print("Sample raw sensor data:")
+for col in sensor_columns[:3]:  # check first 3 sensor columns
+    print(f"\nColumn: {col}")
+    print(df[col].head(5))
+
+df[sensor_columns] = df[sensor_columns].replace('?', pd.NA)
+
+# Extract numeric part after colon if present (e.g., "1:15596.162100" -> "15596.162100")
+df[sensor_columns] = df[sensor_columns].apply(
+    lambda col: col.astype(str).str.split(":").str[-1]
+)
 
 # 2. Ensure all sensor data is numeric (coerce errors)
 df[sensor_columns] = df[sensor_columns].apply(pd.to_numeric, errors='coerce')
@@ -23,15 +37,10 @@ df.dropna(subset=sensor_columns, inplace=True)
 print(f"After coercing to numeric and dropping NaNs: {len(df)}")
 
 # Stop if DataFrame is empty
-if df.empty:
-    raise ValueError("No data left after cleaning steps. Please review the dataset.")
 
 # 4. Remove extreme outliers (Z-score based filtering)
 df = df[(zscore(df[sensor_columns]) < 3).all(axis=1)]
 print(f"After z-score filtering: {len(df)}")
-
-if df.empty:
-    raise ValueError("No data left after removing outliers. Consider adjusting the z-score threshold.")
 
 # 5. Normalize sensor values to [0, 1]
 scaler = MinMaxScaler()

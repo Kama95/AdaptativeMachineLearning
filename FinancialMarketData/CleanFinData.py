@@ -8,6 +8,13 @@ new_header = raw_df.iloc[0]
 df = raw_df[1:].copy()
 df.columns = new_header
 
+
+df.columns = ['Date', 'AAPL_Close', 'GOOGL_Close', 'MSFT_Close',
+              'AAPL_High', 'GOOGL_High', 'MSFT_High',
+              'AAPL_Low', 'GOOGL_Low', 'MSFT_Low',
+              'AAPL_Open', 'GOOGL_Open', 'MSFT_Open',
+              'AAPL_Volume', 'GOOGL_Volume', 'MSFT_Volume']
+
 # Drop rows with any missing date or price info
 df = df.dropna(subset=['Date'])
 

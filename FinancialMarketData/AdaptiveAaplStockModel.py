@@ -2,7 +2,11 @@
 
 import pandas as pd
 import matplotlib.pyplot as plt
-from river import tree, preprocessing, metrics, stream
+from river import datasets
+from river import evaluate
+from river import metrics
+from river import forest
+from river import preprocessing
 
 # STEP 1: Load Cleaned Data
 df = pd.read_csv("cleaned_financial_market_data.csv")
@@ -20,7 +24,9 @@ feature_cols = ['AAPL_Open', 'AAPL_High', 'AAPL_Low', 'AAPL_Volume']
 target_col = 'Up'
 
 # STEP 5: Initialize Model & Metric
-model = preprocessing.StandardScaler() | tree.HoeffdingTreeClassifier()
+model = (
+    preprocessing.StandardScaler() | forest.ARFClassifier(seed=42)
+)
 batch_accuracy = []
 batch_labels = []
 

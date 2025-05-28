@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import StandardScaler
-from river import tree, naive_bayes, ensemble, drift, metrics
+from river import tree, naive_bayes, forest, drift, metrics
 import yfinance as yf
 
 # --- Helper Functions ---
@@ -26,7 +26,7 @@ def stream_batches(df, batch_size=30):
 class AdaptiveModel:
     def __init__(self, model_name='ARF'):
         if model_name == 'ARF':
-            self.model = ensemble.AdaptiveRandomForestClassifier()
+            self.model = forest.ARFClassifier()
         elif model_name == 'HT':
             self.model = tree.HoeffdingTreeClassifier()
         elif model_name == 'NB':
@@ -43,7 +43,7 @@ class AdaptiveModel:
         self.kappa.update(y, y_pred)
         self.model.learn_one(x, y)
         self.drift_detector.update(int(y_pred != y))
-        drift = self.drift_detector.change_detected
+        drift = self.drift_detector.drift_detected
         return y_pred, drift
 
 def run_simulation(data, model_name='ARF'):
